@@ -3,6 +3,11 @@
 const fs = require('fs')
 const _ = require('lodash')
 
+/**
+ * @typedef IAuth
+ * @property {string} fingerprint
+ */
+
 class Api {
   constructor (caller, opts = {}) {
     this.caller = caller
@@ -13,6 +18,11 @@ class Api {
 
   init () {}
 
+  /**
+   * @param {string} service 
+   * @param {any} msg 
+   * @returns {{service: string, svp: string[]}}
+   */
   _space (service, msg) {
     return {
       service: service,
@@ -20,14 +30,23 @@ class Api {
     }
   }
 
+  /**
+   * @returns {boolean}
+   */
   isCtxReady () {
     return !!this.ctx
   }
 
+  /**
+   * @returns {void}
+   */
   clearCtx () {
     this.ctx = null
   }
 
+  /**
+   * @returns {void}
+   */
   loadAcl () {
     if (this.acl) {
       return
@@ -48,6 +67,12 @@ class Api {
     this.acl = acl
   }
 
+  /**
+   * @param {string} fingerprint 
+   * @param {string} action 
+   * @param {any} args 
+   * @returns {boolean}
+   */
   checkAcl (fingerprint, action, args) {
     if (!this.acl) {
       return false
@@ -76,6 +101,12 @@ class Api {
     return true
   }
 
+  /**
+   * @param {IAuth} auth 
+   * @param {string} action 
+   * @param {any} args 
+   * @returns 
+   */
   auth (auth, action, args) {
     if (!auth) {
       return false
@@ -92,6 +123,10 @@ class Api {
     return valid
   }
 
+  /**
+   * @param {string} action 
+   * @returns {false|string}
+   */
   getStreamHandler (action) {
     if (!action) return false
 
@@ -106,6 +141,16 @@ class Api {
     return action
   }
 
+  /**
+   * @template T
+   * @param {string} service 
+   * @param {string} action 
+   * @param {any} req 
+   * @param {any} res 
+   * @param {any} meta 
+   * @param {function(null|Error, any): T} cb
+   * @returns {T}
+   */
   handleStream (service, action, req, res, meta, cb) {
     if (!this.ctx) {
       this.ctx = this.caller.getCtx()
@@ -125,6 +170,13 @@ class Api {
     method.call(this, space, req, res, meta, cb)
   }
 
+  /**
+   * @template T
+   * @param {string} service 
+   * @param {{action: string, args: any[], _isSecure: any, _auth: IAuth}} msg 
+   * @param {function(null|Error, any): T} cb 
+   * @returns {T}
+   */
   handle (service, msg, cb) {
     if (!this.ctx) {
       this.ctx = this.caller.getCtx()

@@ -8,6 +8,11 @@ class WrkApi extends Base {
   init () {
     super.init()
 
+    /** @type {import('bfx-facs-grc')} */
+    this.grc_bfx
+    /** @type {import('bfx-facs-api')} */
+    this.api_bfx
+
     this.setInitFacs([
       ['fac', 'bfx-facs-grc', 'p0', 'bfx', () => {
         return this.getGrcConf()
@@ -18,6 +23,9 @@ class WrkApi extends Base {
     ])
   }
 
+  /**
+   * @returns {{svc_port: number, services: ReturnType<WrkApi['getGrcServices']>}}
+   */
   getGrcConf () {
     return {
       svc_port: this.ctx.apiPort || 0,
@@ -25,6 +33,9 @@ class WrkApi extends Base {
     }
   }
 
+  /**
+   * @returns {null|any[]}
+   */
   getGrcServices () {
     const group = this.group
     const conf = this.conf[group]
@@ -36,6 +47,9 @@ class WrkApi extends Base {
     return null
   }
 
+  /**
+   * @returns {{path: string}}
+   */
   getApiConf () {
     const wrk = path.basename(this.ctx.worker, '.js')
     const tmp = wrk.split('.')
@@ -48,6 +62,10 @@ class WrkApi extends Base {
     }
   }
 
+  /**
+   * @param {string} type 
+   * @returns {{rootPath: string, grc_bfx?: any}}
+   */
   getPluginCtx (type) {
     const ctx = super.getPluginCtx(type)
 
@@ -62,6 +80,10 @@ class WrkApi extends Base {
     return ctx
   }
 
+  /**
+   * @param {function(null|Error, any): any} cb
+   * @returns {void}
+   */
   _start (cb) {
     async.series([ next => { super._start(next) },
       next => {
